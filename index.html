@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Produk Affiliate</title>
+    <title id="pageTitle">Katalog Produk Affiliate</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -23,9 +23,9 @@
     </script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -37,7 +37,7 @@
     <header class="sticky top-0 z-30 bg-brand-dark/95 backdrop-blur-md border-b border-white/10 px-4 py-3">
         <div class="max-w-md mx-auto flex items-center justify-between">
             <h1 class="text-lg font-bold text-brand-accent flex items-center gap-2">
-                <i class="fa-solid fa-bag-shopping"></i> Katalog Produk
+                <i class="fa-solid fa-bag-shopping"></i> Katalog
             </h1>
             <div class="relative w-1/2">
                 <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Cari produk..." 
@@ -52,19 +52,17 @@
         <!-- Header Profil -->
         <div class="flex items-center justify-between bg-brand-card p-3 rounded-2xl border border-white/10 mb-3">
             <div class="flex items-center gap-3">
-                <!-- Logo Toko Dinamis dari Firebase -->
-                <div class="w-10 h-10 rounded-full border border-white/20 overflow-hidden flex items-center justify-center bg-white/10">
-                    <img id="storeLogo" src="https://via.placeholder.com/40" alt="Logo" class="w-full h-full object-cover">
-                </div>
+                <!-- ID logo diperjelas agar mudah diubah oleh script -->
+                <img id="storeLogoImg" src="https://via.placeholder.com/40" alt="Logo" class="w-10 h-10 rounded-full object-cover border border-white/20">
                 <div>
-                    <!-- Nama Toko Dinamis dari Firebase -->
-                    <h2 id="storeName" class="text-xs font-bold text-white flex items-center gap-1">
-                        Gilang project id <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
+                    <!-- ID nama toko diperjelas -->
+                    <h2 id="storeNameText" class="text-xs font-bold text-white flex items-center gap-1">
+                        Memuat Toko... <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
                     </h2>
                     <p class="text-[10px] text-gray-400">Rekomendasi Produk & Affiliate</p>
                 </div>
             </div>
-            <button onclick="shareStore()" class="bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1">
+            <button onclick="shareCatalog()" class="bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1 transition">
                 <i class="fa-solid fa-share-nodes"></i> Bagikan
             </button>
         </div>
@@ -82,11 +80,11 @@
 
         <!-- Tombol Filter Kategori -->
         <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-            <button onclick="filterCategory('all')" class="bg-brand-accent text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0">Semua</button>
-            <button onclick="filterCategory('fashion')" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0">Fashion</button>
-            <button onclick="filterCategory('otomotif')" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0">Otomotif</button>
-            <button onclick="filterCategory('perawatan')" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0">Perawatan</button>
-            <button onclick="filterCategory('elektronik')" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0">Elektronik</button>
+            <button onclick="filterCategory('all')" id="btn-all" class="bg-brand-accent text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0 transition">Semua</button>
+            <button onclick="filterCategory('fashion')" id="btn-fashion" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0 transition">Fashion</button>
+            <button onclick="filterCategory('otomotif')" id="btn-otomotif" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0 transition">Otomotif</button>
+            <button onclick="filterCategory('perawatan')" id="btn-perawatan" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0 transition">Perawatan</button>
+            <button onclick="filterCategory('elektronik')" id="btn-elektronik" class="bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0 transition">Elektronik</button>
         </div>
     </section>
 
@@ -101,34 +99,24 @@
         </div>
     </main>
 
-    <!-- Modal Detail Produk dengan Multi-Gambar Galeri -->
+    <!-- Modal Detail Produk -->
     <div id="productModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-brand-card w-full max-w-sm rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex flex-col max-h-[90vh]">
             
-            <!-- Gambar Utama Modal & Tombol Close -->
             <div class="relative w-full bg-black shrink-0">
-                <div class="relative h-48 sm:h-72 w-full">
+                <div class="relative h-72 w-full">
                     <img id="modalImg" src="" alt="Product Image" class="w-full h-full object-cover transition-all duration-200">
                     <button onclick="closeModal()" class="absolute top-3 right-3 bg-black/60 hover:bg-black/80 w-9 h-9 rounded-full flex items-center justify-center text-white backdrop-blur-md border border-white/20 transition z-10">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                     <div class="absolute bottom-3 left-3 flex gap-1.5 z-10">
-                        <span id="modalBadge" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-brand-accent text-white shadow-md">
-                            MALL
-                        </span>
-                        <span id="modalCommission" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-orange-500/90 text-white shadow-md">
-                            KOMISI S.D 10%
-                        </span>
+                        <span id="modalBadge" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-brand-accent text-white shadow-md">MALL</span>
+                        <span id="modalCommission" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-orange-500/90 text-white shadow-md">KOMISI S.D 10%</span>
                     </div>
                 </div>
-
-                <!-- Slider Thumbnail Banyak Gambar -->
-                <div id="modalThumbs" class="flex gap-2 p-2 bg-[#101010] overflow-x-auto hide-scrollbar border-b border-white/10">
-                    <!-- Thumbnail di-render otomatis via JavaScript -->
-                </div>
+                <div id="modalThumbs" class="flex gap-2 p-2 bg-[#101010] overflow-x-auto hide-scrollbar border-b border-white/10"></div>
             </div>
 
-            <!-- Detail Teks Produk -->
             <div class="p-4 overflow-y-auto space-y-3">
                 <div class="flex items-center justify-between">
                     <span id="modalCategory" class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold bg-white/5 px-2 py-0.5 rounded">Category</span>
@@ -148,7 +136,6 @@
                 </div>
             </div>
 
-            <!-- Tombol Beli / Shopee -->
             <div class="p-4 bg-brand-card border-t border-white/10 shrink-0">
                 <button id="modalActionBtn" class="w-full bg-brand-accent hover:bg-red-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-brand-accent/20">
                     <span>Beli Sekarang di Shopee</span>
@@ -161,7 +148,6 @@
 
     <!-- Script Utama JavaScript -->
     <script>
-        // Configuration Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyCFa4G2bnhvFT-jbEZfgz8kasX_5Qkkdp8",
             authDomain: "projectid-802fe.firebaseapp.com",
@@ -172,7 +158,6 @@
             appId: "1:776316465072:web:ZGE2NDI4ZDKtZDY3MC0nWE2LTg1NTQtMTg0MTRmMmE1NTMy"
         };
 
-        // Inisialisasi Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -180,31 +165,34 @@
 
         let products = [];
         let selectedProduct = null;
+        let currentCategory = 'all';
 
-        // ==========================================
-        // SYNC SETTINGS (GANTI NAMA & LOGO DARI ADMIN)
-        // ==========================================
+        // 1. Ambil Pengaturan Toko dari Firestore (koleksi: settings, dokumen: store)
         db.collection("settings").doc("store").onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
+                // Update Nama Toko
                 if (data.name) {
-                    document.getElementById('storeName').innerHTML = `
-                        ${data.name} <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
-                    `;
+                    document.getElementById('storeNameText').innerHTML = `${data.name} <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>`;
+                    document.getElementById('pageTitle').innerText = data.name;
                 }
+                // Update Logo Toko (bisa berupa URL atau Base64 dari upload file admin)
                 if (data.logo) {
-                    document.getElementById('storeLogo').src = data.logo;
+                    document.getElementById('storeLogoImg').src = data.logo;
                 }
+            } else {
+                console.warn("Dokumen settings/store belum ada di Firestore. Silakan simpan pengaturan dari Admin Panel terlebih dahulu.");
             }
+        }, (error) => {
+            console.error("Gagal memuat pengaturan toko:", error);
         });
 
-        // Ambil Data Produk dari Firestore
+        // 2. Ambil Data Produk dari Firestore
         db.collection("products").onSnapshot((snapshot) => {
             products = [];
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 
-                // Ekstrak array imageUrls jika ada, atau buat fallback ke single image
                 const imgs = (Array.isArray(data.imageUrls) && data.imageUrls.length > 0) 
                     ? data.imageUrls 
                     : [data.imageUrl || data.image || "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=600&auto=format&fit=crop"];
@@ -218,13 +206,13 @@
                     category: (data.category || "fashion").toLowerCase(),
                     commission: data.commission || "Komisi s.d 10%",
                     badge: data.badge || "MALL",
-                    images: imgs,         // Menyimpan SELURUH ARRAY gambar
-                    image: imgs[0],        // Gambar pertama untuk thumbnail katalog
+                    images: imgs,
+                    image: imgs[0],
                     desc: data.desc || "Deskripsi produk belum tersedia.",
                     link_shopee: data.link || data.link_shopee || "#"
                 });
             });
-            renderProducts(products);
+            filterCategory(currentCategory);
         }, (error) => {
             console.error("Gagal mengambil data dari Firebase:", error);
         });
@@ -243,8 +231,8 @@
                 return;
             }
 
-            container.innerHTML = items.map((p, index) => `
-                <div onclick="openModalByIndex(${index})" class="bg-brand-card rounded-xl overflow-hidden border border-white/5 hover:border-brand-accent/50 transition cursor-pointer flex flex-col justify-between">
+            container.innerHTML = items.map((p) => `
+                <div onclick="openModal('${p.id}')" class="bg-brand-card rounded-xl overflow-hidden border border-white/5 hover:border-brand-accent/50 transition cursor-pointer flex flex-col justify-between">
                     <div>
                         <div class="relative h-40 w-full overflow-hidden bg-black/40">
                             <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover">
@@ -267,18 +255,14 @@
             `).join('');
         }
 
-        function openModalByIndex(index) {
-            openModal(products[index]);
-        }
-
-        // Buka Modal & Tampilkan Semua Gambar Thumbnail
-        function openModal(product) {
+        // Buka Modal Detail Produk
+        function openModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
             selectedProduct = product;
             
-            // Set Gambar Utama
             document.getElementById('modalImg').src = product.image;
             
-            // Render Thumbnail Multi Gambar
             const thumbsContainer = document.getElementById('modalThumbs');
             thumbsContainer.innerHTML = '';
 
@@ -298,14 +282,12 @@
                         thumb.classList.remove('border-transparent', 'opacity-60');
                         thumb.classList.add('border-brand-accent', 'opacity-100');
                     };
-                    
                     thumbsContainer.appendChild(thumb);
                 });
             } else {
                 thumbsContainer.classList.add('hidden');
             }
 
-            // Set Data Teks Modal
             document.getElementById('modalTitle').innerText = product.title;
             document.getElementById('modalPrice').innerText = 'Rp' + product.price.toLocaleString('id-ID');
             document.getElementById('modalDesc').innerText = product.desc;
@@ -331,31 +313,58 @@
         // Filter Pencarian Text
         function filterProducts() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = products.filter(p => p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            let filtered = products;
+            
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(p => p.category === currentCategory);
+            }
+
+            if (query) {
+                filtered = filtered.filter(p => p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            }
             renderProducts(filtered);
         }
 
         // Filter Kategori Tombol
         function filterCategory(cat) {
-            if (cat === 'all') {
-                renderProducts(products);
-            } else {
-                const filtered = products.filter(p => p.category === cat);
-                renderProducts(filtered);
+            currentCategory = cat;
+            
+            ['all', 'fashion', 'otomotif', 'perawatan', 'elektronik'].forEach(c => {
+                const btn = document.getElementById(`btn-${c}`);
+                if (btn) {
+                    if (c === cat) {
+                        btn.className = "bg-brand-accent text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0 transition";
+                    } else {
+                        btn.className = "bg-brand-card hover:bg-white/10 text-gray-300 text-xs font-medium px-4 py-2 rounded-xl border border-white/10 shrink-0 transition";
+                    }
+                }
+            });
+
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = products;
+
+            if (cat !== 'all') {
+                filtered = filtered.filter(p => p.category === cat);
             }
+
+            if (query) {
+                filtered = filtered.filter(p => p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            }
+
+            renderProducts(filtered);
         }
 
-        // Fungsi Tombol Bagikan Toko
-        function shareStore() {
+        // Tombol Bagikan Katalog
+        function shareCatalog() {
             if (navigator.share) {
                 navigator.share({
-                    title: document.getElementById('storeName').innerText.trim(),
+                    title: document.title,
                     text: 'Cek katalog rekomendasi produk pilihan terbaik di sini!',
                     url: window.location.href
-                }).catch(console.error);
+                }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(window.location.href);
-                alert('Link toko berhasil disalin!');
+                alert("Link katalog berhasil disalin ke clipboard!");
             }
         }
     </script>
