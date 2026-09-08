@@ -52,15 +52,19 @@
         <!-- Header Profil -->
         <div class="flex items-center justify-between bg-brand-card p-3 rounded-2xl border border-white/10 mb-3">
             <div class="flex items-center gap-3">
-                <img src="https://via.placeholder.com/40" alt="Logo" class="w-10 h-10 rounded-full border border-white/20">
+                <!-- Logo Toko Dinamis dari Firebase -->
+                <div class="w-10 h-10 rounded-full border border-white/20 overflow-hidden flex items-center justify-center bg-white/10">
+                    <img id="storeLogo" src="https://via.placeholder.com/40" alt="Logo" class="w-full h-full object-cover">
+                </div>
                 <div>
-                    <h2 class="text-xs font-bold text-white flex items-center gap-1">
+                    <!-- Nama Toko Dinamis dari Firebase -->
+                    <h2 id="storeName" class="text-xs font-bold text-white flex items-center gap-1">
                         Gilang project id <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
                     </h2>
                     <p class="text-[10px] text-gray-400">Rekomendasi Produk & Affiliate</p>
                 </div>
             </div>
-            <button class="bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1">
+            <button onclick="shareStore()" class="bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1">
                 <i class="fa-solid fa-share-nodes"></i> Bagikan
             </button>
         </div>
@@ -177,6 +181,23 @@
         let products = [];
         let selectedProduct = null;
 
+        // ==========================================
+        // SYNC SETTINGS (GANTI NAMA & LOGO DARI ADMIN)
+        // ==========================================
+        db.collection("settings").doc("store").onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.name) {
+                    document.getElementById('storeName').innerHTML = `
+                        ${data.name} <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
+                    `;
+                }
+                if (data.logo) {
+                    document.getElementById('storeLogo').src = data.logo;
+                }
+            }
+        });
+
         // Ambil Data Produk dari Firestore
         db.collection("products").onSnapshot((snapshot) => {
             products = [];
@@ -197,7 +218,7 @@
                     category: (data.category || "fashion").toLowerCase(),
                     commission: data.commission || "Komisi s.d 10%",
                     badge: data.badge || "MALL",
-                    images: imgs,          // Menyimpan SELURUH ARRAY gambar
+                    images: imgs,         // Menyimpan SELURUH ARRAY gambar
                     image: imgs[0],        // Gambar pertama untuk thumbnail katalog
                     desc: data.desc || "Deskripsi produk belum tersedia.",
                     link_shopee: data.link || data.link_shopee || "#"
@@ -321,6 +342,20 @@
             } else {
                 const filtered = products.filter(p => p.category === cat);
                 renderProducts(filtered);
+            }
+        }
+
+        // Fungsi Tombol Bagikan Toko
+        function shareStore() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('storeName').innerText.trim(),
+                    text: 'Cek katalog rekomendasi produk pilihan terbaik di sini!',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link toko berhasil disalin!');
             }
         }
     </script>
