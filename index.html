@@ -52,10 +52,8 @@
         <!-- Header Profil -->
         <div class="flex items-center justify-between bg-brand-card p-3 rounded-2xl border border-white/10 mb-3">
             <div class="flex items-center gap-3">
-                <!-- ID logo diperjelas agar mudah diubah oleh script -->
                 <img id="storeLogoImg" src="https://via.placeholder.com/40" alt="Logo" class="w-10 h-10 rounded-full object-cover border border-white/20">
                 <div>
-                    <!-- ID nama toko diperjelas -->
                     <h2 id="storeNameText" class="text-xs font-bold text-white flex items-center gap-1">
                         Memuat Toko... <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
                     </h2>
@@ -163,32 +161,41 @@
         }
         const db = firebase.firestore();
 
+        // 1. Ambil ID Toko dari parameter URL (misal: website.com/?toko=USER_ID)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokoId = urlParams.get('toko');
+
         let products = [];
         let selectedProduct = null;
         let currentCategory = 'all';
 
-        // 1. Ambil Pengaturan Toko dari Firestore (koleksi: settings, dokumen: store)
-        db.collection("settings").doc("store").onSnapshot((doc) => {
+        // 2. Ambil Pengaturan Toko dari Firestore (Mendukung Multi-User)
+        const settingsRef = tokoId ? db.collection("settings").doc(tokoId) : db.collection("settings").doc("store");
+
+        settingsRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
-                // Update Nama Toko
                 if (data.name) {
                     document.getElementById('storeNameText').innerHTML = `${data.name} <i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>`;
                     document.getElementById('pageTitle').innerText = data.name;
                 }
-                // Update Logo Toko (bisa berupa URL atau Base64 dari upload file admin)
                 if (data.logo) {
                     document.getElementById('storeLogoImg').src = data.logo;
                 }
             } else {
-                console.warn("Dokumen settings/store belum ada di Firestore. Silakan simpan pengaturan dari Admin Panel terlebih dahulu.");
+                console.warn("Dokumen toko belum ditemukan.");
             }
         }, (error) => {
             console.error("Gagal memuat pengaturan toko:", error);
         });
 
-        // 2. Ambil Data Produk dari Firestore
-        db.collection("products").onSnapshot((snapshot) => {
+        // 3. Ambil Data Produk khusus Toko tersebut dari Firestore
+        let productsQuery = db.collection("products");
+        if (tokoId) {
+            productsQuery = productsQuery.where("userId", "==", tokoId);
+        }
+
+        productsQuery.onSnapshot((snapshot) => {
             products = [];
             snapshot.forEach((doc) => {
                 const data = doc.data();
