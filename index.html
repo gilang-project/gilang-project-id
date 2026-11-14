@@ -109,7 +109,6 @@
                     </button>
                     <div class="absolute bottom-3 left-3 flex gap-1.5 z-10">
                         <span id="modalBadge" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-brand-accent text-white shadow-md">MALL</span>
-                        <span id="modalCommission" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-lg bg-orange-500/90 text-white shadow-md">KOMISI S.D 10%</span>
                     </div>
                 </div>
                 <div id="modalThumbs" class="flex gap-2 p-2 bg-[#101010] overflow-x-auto hide-scrollbar border-b border-white/10"></div>
@@ -211,7 +210,6 @@
                     rating: data.rating || 4.9,
                     sold: data.sold || "10RB+",
                     category: (data.category || "fashion").toLowerCase(),
-                    commission: data.commission || "Komisi s.d 10%",
                     badge: data.badge || "MALL",
                     images: imgs,
                     image: imgs[0],
@@ -299,7 +297,6 @@
             document.getElementById('modalPrice').innerText = 'Rp' + product.price.toLocaleString('id-ID');
             document.getElementById('modalDesc').innerText = product.desc;
             document.getElementById('modalBadge').innerText = product.badge;
-            document.getElementById('modalCommission').innerText = product.commission;
             document.getElementById('modalCategory').innerText = product.category;
             document.getElementById('modalSold').innerText = 'Terjual ' + product.sold;
             document.getElementById('modalRating').innerText = product.rating;
